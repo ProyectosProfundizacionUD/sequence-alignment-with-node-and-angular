@@ -1,0 +1,44 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "sequence alignment project!",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ProyectosProfundizacionUD/sequence-alignment-with-node-and-angular.git"
+  },
+  "keywords": [
+    "sequence",
+    "aligment",
+    "bioinformatics",
+    "needleman",
+    "and",
+    "wunsch",
+    "dotplot",
+    "global",
+    "aligment",
+    "local",
+    "alignment"
+  ],
+  "author": "Diego Restrepo, Johan Samir, David Galindo",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ProyectosProfundizacionUD/sequence-alignment-with-node-and-angular/issues"
+  },
+  "homepage": "https://github.com/ProyectosProfundizacionUD/sequence-alignment-with-node-and-angular#readme",
+  "dependencies": {
+    "connect-multiparty": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "moment": "^2.29.4",
+    "mongoose": "^6.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
+}
