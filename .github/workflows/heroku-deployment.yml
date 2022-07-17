@@ -19,9 +19,9 @@ jobs:
     - name: Build
       run: |
         npm i -g @angular/cli@12.2.14
-        cd ./frontend && npm install && ng build --prod
+        cd ./frontend && npm install && ng build --configuration production
         cd ../backend && npm install
-    - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+    - uses: akhileshns/heroku-deploy@v3.12.12
       with:
         appdir: "./backend"
         heroku_api_key: ${{secrets.HEROKU_API_KEY}}
