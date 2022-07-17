@@ -19,11 +19,11 @@ const createSequence = async (req, res) => {
     res.status(400).send("Error invalid format, must be FASTA");
 
   const entryHead = lines[0];
-
-  if (entryHead.split("|")[1] == undefined || entryHead.split("|")[1] == null)
-    res.status(400).send("Error invalid format, must be FASTA");
-
+  
   const entryIdentifier = entryHead.split("|")[1];
+
+  if (entryIdentifier == undefined || entryIdentifier == null)
+    res.status(400).send("Error invalid format, must be FASTA with GI");
 
   let entryOrganism =
     req.body.organism != undefined
