@@ -10,12 +10,14 @@ const app = express();
 
 app.use(express.json())
 app.use(cors());
-app.use(express.static("public"));
-/*app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "public/index.html"));
-});*/
 app.use('/api/sequence', Sequence);
 app.use('/api', Health);
+
+
+app.use(express.static("public"));
+app.get("*", (req, res) => {
+  res.sendFile(path.resolve(__dirname, "public/index.html"));
+});
 
 app.listen(
   process.env.PORT,
