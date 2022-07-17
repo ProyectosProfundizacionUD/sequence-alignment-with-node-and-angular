@@ -1,6 +1,8 @@
 const mongoose = require('mongoose')
 
 const sequenceSchema = mongoose.Schema({
+  organism: String,
+  identifier: String,
   head: String,
   sequence: String,
   description: String,
