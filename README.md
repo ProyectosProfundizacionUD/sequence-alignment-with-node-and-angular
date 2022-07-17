@@ -9,7 +9,7 @@ npm install
 ## How to run in local environment?
 To run the backend you need to open a cmd console into the backend folder an run the next command:  
 ```
-npm start
+npm test
 ```
 This will run the backend on port 3000    
 To run the frontend you only need to go to the frontend folder a type the next command:
