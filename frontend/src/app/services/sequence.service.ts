@@ -17,4 +17,7 @@ export class SequenceService {
   listSequence(){
     return this._httpClient.get<any>(`${ this.env }sequence`);
   }
+  CreateSequence(data: any){
+    return this._httpClient.post<any>(`${ this.env }sequence`, data);
+  }
 }
