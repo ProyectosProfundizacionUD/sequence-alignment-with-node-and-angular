@@ -18,7 +18,7 @@ jobs:
 
     - name: Build
       run: |
-        npm i -g @angular/cli@12.2.14
+        npm i -g @angular/cli@12.2.13
         cd ./frontend && npm install && ng build --configuration production
         cd ../backend && npm install
     - uses: akhileshns/heroku-deploy@v3.12.12
