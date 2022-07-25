@@ -133,6 +133,7 @@ const GlobalAlignment = async (sequence, organism, res) => {
       score: tempScore,
     });
     tempResult = "";
+    tempScore = 0;
   }
 
   return res.status(200).send(result);

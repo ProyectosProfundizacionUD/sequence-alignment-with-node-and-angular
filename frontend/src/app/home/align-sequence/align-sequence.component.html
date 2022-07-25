@@ -1,1 +1,154 @@
-<p>align-sequence works!</p>
+<div class="content py-4">
+  <mat-card class="example-card">
+    <mat-card-header>
+      <mat-card-title>Ingrese/Cargue la secuencia</mat-card-title>
+      <mat-card-subtitle
+        >Solo seran validos archivos .fasta con GI</mat-card-subtitle
+      >
+
+      <section class="example-section">
+        <mat-radio-group [(ngModel)]="this.isChargingFile">
+          <mat-radio-button
+            class="example-margin"
+            (click)="this.isChargingFile = false"
+            [value]="false"
+            >Registrar Secuencia</mat-radio-button
+          >
+          <br />
+          <mat-radio-button
+            class="example-margin"
+            (click)="this.isChargingFile = true"
+            [value]="true"
+            >Cargar FASTA</mat-radio-button
+          >
+        </mat-radio-group>
+      </section>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="mb-3" *ngIf="this.isChargingFile">
+        <div class="input-group">
+          <label for="upload-fasta"></label>
+          <input
+            type="file"
+            class="form-control"
+            id="upload-fasta"
+            aria-label="Upload"
+            (change)="uploadFasta($event)"
+            accept=".fasta"
+          />
+        </div>
+      </div>
+
+      <div *ngIf="this.isChargingFile == false">
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Secuencia</mat-label>
+          <textarea
+            matInput
+            required
+            [(ngModel)]="registerSequence.sequence"
+          ></textarea>
+        </mat-form-field>
+      </div>
+
+      <mat-accordion>
+        <mat-expansion-panel hideToggle>
+          <mat-expansion-panel-header>
+            <mat-panel-title> Comparar con la base </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <section class="example-section">
+            <mat-radio-group [(ngModel)]="this.selectAlignment">
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('GlobalWithBase')"
+                [value]="false"
+                >Alineamiento Global</mat-radio-button
+              >
+              <br />
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('LocalWithBase')"
+                [value]="true"
+                >Alineamiento Local</mat-radio-button
+              >
+            </mat-radio-group>
+          </section>
+          <div *ngIf="this.showLocalWithBase">
+            <p class="fs-6 mt-3">Digite los rangos iniciales y finales para el alineamiento local</p>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>X1</mat-label>
+              <input 
+              type="number" 
+              matInput 
+              placeholder="0" 
+              value="0"
+              min="0"
+              max="60"
+              >
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>X2</mat-label>
+              <input 
+              type="number" 
+              matInput 
+              placeholder="0" 
+              value="0"
+              min="0"
+              max="60"
+              >
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>y1</mat-label>
+              <input 
+              type="number" 
+              matInput 
+              placeholder="0" 
+              value="0"
+              min="0"
+              max="60"
+              >
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>y2</mat-label>
+              <input 
+              type="number" 
+              matInput 
+              placeholder="0" 
+              value="0"
+              min="0"
+              max="60"
+              >
+            </mat-form-field>
+          </div>
+
+        </mat-expansion-panel>
+        <mat-expansion-panel
+          (opened)="panelOpenState = true"
+          (closed)="panelOpenState = false"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title> Comparar con una secuencia </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <mat-form-field appearance="fill">
+            <mat-label>Seleccionar la secuencia</mat-label>
+            <mat-select>
+              <mat-option
+                *ngFor="let sequence of sequences"
+                [value]="sequence.identifier"
+              >
+                {{ sequence.organism }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+        </mat-expansion-panel>
+      </mat-accordion>
+    </mat-card-content>
+    <mat-card-actions>
+      <button (click)="startAlignment()" class="button" mat-raised-button>
+        Crear
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

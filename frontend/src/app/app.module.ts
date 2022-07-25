@@ -30,7 +30,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { SequenceComponent } from './home/sequence/sequence.component';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatRadioModule } from '@angular/material/radio';
-
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatSelectModule } from '@angular/material/select';
 
 @NgModule({
   declarations: [
@@ -59,6 +60,8 @@ import { MatRadioModule } from '@angular/material/radio';
     MatIconModule,
     MatCheckboxModule,
     MatRadioModule,
+    MatExpansionModule,
+    MatSelectModule,
   ],
   providers: [ AlignService, SequenceService, UtilsService ],
   bootstrap: [AppComponent]
