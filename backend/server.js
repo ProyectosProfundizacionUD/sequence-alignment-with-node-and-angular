@@ -1,3 +1,4 @@
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { dbConnection } = require('./db/db');
@@ -5,6 +6,7 @@ require('dotenv').config();
 //endpoints
 const Sequence = require('./routes/sequence');
 const Health = require('./routes/health');
+const Alignment = require('./routes/alignments');
 
 const app = express();
 
@@ -12,7 +14,7 @@ app.use(express.json())
 app.use(cors());
 app.use('/api/sequence', Sequence);
 app.use('/api', Health);
-
+app.use('/api/align', Alignment);
 
 app.use(express.static("public"));
 app.get("*", (req, res) => {

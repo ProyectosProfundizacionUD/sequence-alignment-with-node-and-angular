@@ -1,0 +1,28 @@
+<div class="content py-4">
+  <div class="center-content">
+    <mat-card class="example-card">
+      <mat-card-header>
+        <img 
+          mat-card-avatar 
+          src="{{ sequenceData.imgUrl }}" 
+          class="header-avatar"
+        >
+        <mat-card-title>{{ sequenceData.organism }}</mat-card-title>
+        <mat-card-subtitle>{{ sequenceData.identifier }}</mat-card-subtitle>
+      </mat-card-header>
+      <img
+        mat-card-image
+        src="{{ sequenceData.imgUrl }}"
+        alt="{{ sequenceData.identifier }} image"
+      />
+      <mat-card-content>
+        <p>
+          {{ sequenceData.description }}
+        </p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button (click)="goBack()">Volver</button>
+      </mat-card-actions>
+    </mat-card>  
+  </div>
+</div>

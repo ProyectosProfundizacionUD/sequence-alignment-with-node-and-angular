@@ -1,0 +1,57 @@
+<div class="bgContentInput">
+  <input
+    type="text"
+    mat-input
+    class="bgInput form-control text-center rounded-0 border-0 my-2"
+    placeholder="Buscar Sequencia"
+    (keyup)="filteredWords()"
+    [(ngModel)]="textFiltered"
+    autofocus
+  />
+</div>
+
+<div class="container">
+  <div class="card-wrapper" *ngIf="sequences.length">
+    <div *ngFor="let sequence of filteredSequence">
+      <mat-card class="information-card" fxFlexAlign="stretch">
+        <mat-card-header class="title-card">
+          <div class="name">
+            <mat-card-title class="title" (click)="enterToSequence(sequence.identifier)">{{
+              sequence.name
+            }}</mat-card-title>
+          </div>
+          <div class="top">
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="menu"
+              aria-label="Example icon-button with a menu"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu class="menu" #menu="matMenu" >
+              <button (click)="onCreate()" mat-menu-item>
+                <mat-icon>edit</mat-icon>
+                <span>Editar</span>
+              </button>
+              <button (click)="deleteSequence(sequence.identifier)" mat-menu-item>
+                <mat-icon>delete</mat-icon>
+                <span>Eliminar</span>
+              </button>
+            </mat-menu>
+          </div>
+        </mat-card-header>
+        <img
+          mat-card-image
+          (click)="enterToSequence(sequence.identifier)"
+          [src]="sequence.imgUrl != '' ? sequence.imgUrl : '../../../../../assets/img/userBoardExample.jpg'"
+        />
+        <mat-card-content>
+          <p>ID: {{sequence.identifier}}</p>
+          <hr>
+          <p>{{sequence.organism}}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+</div>

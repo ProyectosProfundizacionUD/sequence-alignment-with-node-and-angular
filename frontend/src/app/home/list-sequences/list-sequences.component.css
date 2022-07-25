@@ -1,0 +1,66 @@
+.bgContentInput {
+  text-align: center;
+}
+
+img{
+  min-height: 120px;
+}
+
+.bgInput {
+  display: inline-block;
+  justify-content: right;
+  background: #383d38;
+  color: #ffffff;
+  width: 500px;
+}
+.bgInput::placeholder {
+  color: #ffffff;
+  border-radius: 10%;
+}
+.information-card {
+  width: 210px;
+  margin: 10px 10px 10px 10px;
+  border-radius: 10%;
+  border: 2px solid #3A656F;
+  cursor: pointer;
+  text-align: start;
+}
+
+.title{
+  font-size: 17px;
+}
+
+img {
+  height: 120px;
+  width: 206px;
+}
+.container{
+  max-width: 86%;
+}
+
+.card-wrapper {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.icon{
+  justify-content: flex-end;
+}
+
+.title-card {
+  width: 100%;
+  min-height: 50px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.name {
+  width: 90%;
+  position: absolute;
+}
+
+.top {
+  width: 10%;
+}
