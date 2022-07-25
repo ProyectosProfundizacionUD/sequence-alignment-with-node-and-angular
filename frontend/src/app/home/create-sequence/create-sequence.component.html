@@ -3,9 +3,32 @@
     <mat-card-header>
       <mat-card-title>Registrar Sequencia</mat-card-title>
       <mat-card-subtitle>Seleccione el tipo de registro</mat-card-subtitle>
+
+      <section class="example-section">
+        <mat-radio-group [(ngModel)]="this.isChargingFile">
+          <mat-radio-button
+            class="example-margin"
+            (click)="this.isChargingFile = false"
+            [value]="false"
+            >Registrar Secuencia</mat-radio-button
+          >
+          <br />
+          <mat-radio-button
+            class="example-margin"
+            (click)="this.isChargingFile = true"
+            [value]="true"
+            >Cargar FASTA</mat-radio-button
+          >
+        </mat-radio-group>
+      </section>
     </mat-card-header>
     <mat-card-content>
-      <div *ngIf="this.isChargingFile">
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Organismo</mat-label>
+        <input matInput [(ngModel)]="registerSequence.organism" />
+      </mat-form-field>
+
+      <div class="mb-3" *ngIf="this.isChargingFile">
         <div class="input-group">
           <label for="upload-fasta"></label>
           <input
@@ -18,49 +41,45 @@
           />
         </div>
       </div>
+
       <div *ngIf="this.isChargingFile == false">
         <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Organismo</mat-label>
-          <input matInput [(ngModel)]="registerSequence.sequence" />
-        </mat-form-field>
-
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Secuencia</mat-label>
+          <mat-label>Secuencia con gi</mat-label>
           <textarea
             matInput
             required
             [(ngModel)]="registerSequence.sequence"
           ></textarea>
         </mat-form-field>
+      </div>
 
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Descripción</mat-label>
-          <textarea
-            matInput
-            required
-            [(ngModel)]="registerSequence.description"
-          ></textarea>
-        </mat-form-field>
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Descripción</mat-label>
+        <textarea
+          matInput
+          required
+          [(ngModel)]="registerSequence.description"
+        ></textarea>
+      </mat-form-field>
 
-        <div class="img-sequence">
-          <img
-            *ngIf="this.registerSequence.imgUrl != ''"
-            class="m-3 rounded mx-auto d-block"
-            width="150px"
-            [src]="this.sequenceImg"
-          />
-        </div>
+      <div class="img-sequence">
+        <img
+          *ngIf="this.registerSequence.imgUrl != ''"
+          class="m-3 rounded mx-auto d-block"
+          width="150px"
+          [src]="this.sequenceImg"
+        />
+      </div>
 
-        <div class="input-group">
-          <input
-            type="file"
-            class="form-control"
-            id="upload"
-            aria-label="Upload"
-            (change)="uploadImg($event)"
-            accept="image/*"
-          />
-        </div>
+      <div class="input-group">
+        <input
+          type="file"
+          class="form-control"
+          id="upload"
+          aria-label="Upload"
+          (change)="uploadImg($event)"
+          accept="image/*"
+        />
       </div>
     </mat-card-content>
     <mat-card-actions>

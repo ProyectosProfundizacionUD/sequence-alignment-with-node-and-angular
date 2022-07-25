@@ -12,9 +12,10 @@ import { AlignSequenceComponent } from './home/align-sequence/align-sequence.com
 //Services
 import { AlignService } from './services/align.service';
 import { SequenceService } from './services/sequence.service';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { UtilsService } from "./services/utils.service";
 
 //imports
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button'
@@ -27,6 +28,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 import { SequenceComponent } from './home/sequence/sequence.component';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 
 
 @NgModule({
@@ -54,8 +57,10 @@ import { SequenceComponent } from './home/sequence/sequence.component';
     MatDialogModule,
     MatMenuModule,
     MatIconModule,
+    MatCheckboxModule,
+    MatRadioModule,
   ],
-  providers: [ AlignService, SequenceService ],
+  providers: [ AlignService, SequenceService, UtilsService ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
