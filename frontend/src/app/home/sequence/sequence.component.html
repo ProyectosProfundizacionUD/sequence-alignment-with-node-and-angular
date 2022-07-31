@@ -16,9 +16,23 @@
         alt="{{ sequenceData.identifier }} image"
       />
       <mat-card-content>
+        <hr>
+        <p class="text-center fs-6">
+          Descripción
+        </p>
+        <hr>
         <p>
           {{ sequenceData.description }}
         </p>
+        <hr>
+        <p class="text-center fs-6">
+          Secuencia
+        </p>
+        <hr>
+        <p class="overflow-auto">
+          {{ sequenceData.sequence }}
+        </p>
+        <p>Tamaño de la secuencia: {{sequenceData.sequence.length}}</p>
       </mat-card-content>
       <mat-card-actions>
         <button mat-button (click)="goBack()">Volver</button>

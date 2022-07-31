@@ -8,9 +8,13 @@ const LocalAndGlobalAlignment = (req, res) => {
   if (!sequence || sequence === "")
     return res.status(400).send("You must send a valid sequence");
 
+  //validar  con expresion regular
+
+  sequence = sequence.toUpperCase()
+
   ValidateHeaders(headers) == true
-    ? LocalAlignment(headers, sequence, organism, res)
-    : GlobalAlignment(sequence, organism, res);
+    ? LocalAlignment(headers, sequence, organism, res, req.params["filter"])
+    : GlobalAlignment(sequence, organism, res, req.params["filter"]);
 };
 
 const ValidateHeaders = (headers) => {
@@ -23,8 +27,9 @@ const ValidateHeaders = (headers) => {
   return false;
 };
 
-const LocalAlignment = async (headers, sequence, organism, res) => {
-  let sequences = await Sequence.find();
+const LocalAlignment = async (headers, sequence, organism, res, filter) => {
+  let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
+
   if (!sequences || sequences.length === 0)
     return res.status(500).send("an error was happen while we get the data");
 
@@ -39,6 +44,7 @@ const LocalAlignment = async (headers, sequence, organism, res) => {
       parseInt(headers["y2"]) + 1
     );
   });
+  let size = sequence.length;
 
   if (
     Number.parseInt(headers["x2"]) - Number.parseInt(headers["x1"]) <
@@ -73,7 +79,10 @@ const LocalAlignment = async (headers, sequence, organism, res) => {
 
   let tempResult = "";
   let tempScore = 0;
+  let sameSize = false;
   for (let i = 0; i < sequences.length; i++) {
+    if(sequences[i].sequence.length == size)
+      sameSize = true;
     for (let j = 0; j < sequence.length; j++) {
       if (sequence[j] == sequences[i].sequence[j]) {
         tempResult += "1";
@@ -87,23 +96,28 @@ const LocalAlignment = async (headers, sequence, organism, res) => {
       sequence: sequences[i].sequence,
       alignment: tempResult,
       score: tempScore,
+      sameSize: sameSize,
     });
     tempResult = "";
+    tempScore = 0;
+    sameSize = false;
   }
+  result.results = result.results.sort(((a, b) => b.score - a.score));
 
   return res.status(200).send(result);
 };
 
-const GlobalAlignment = async (sequence, organism, res) => {
-  let sequences = await Sequence.find();
+const GlobalAlignment = async (sequence, organism, res, filter) => {
+  let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
   if (!sequences || sequences.length === 0)
     return res.status(500).send("an error was happen while we get the data");
 
   // validamos que el tamaño de la secuencia sea igual al tamaño estandar
   // de las secuencias almacenadas, de no serlo, le concatenamos campos vacios
   // hasta completar un tamaño igual a "60"
-  if (sequence.length < 60) {
-    let lengthToApply = 60 - sequence.length;
+  let size = sequence.length;
+  if (size < 60) {
+    let lengthToApply = 60 - size;
     for (let i = 0; i < lengthToApply; i++) {
       sequence += " ";
     }
@@ -117,7 +131,10 @@ const GlobalAlignment = async (sequence, organism, res) => {
 
   let tempResult = "";
   let tempScore = 0;
+  let sameSize = false;
   for (let i = 0; i < sequences.length; i++) {
+    if(sequences[i].sequence.length == size)
+      sameSize = true;
     for (let j = 0; j < sequence.length; j++) {
       if (sequence[j] == sequences[i].sequence[j]) {
         tempResult += "1";
@@ -131,9 +148,13 @@ const GlobalAlignment = async (sequence, organism, res) => {
       sequence: sequences[i].sequence,
       alignment: tempResult,
       score: tempScore,
+      sameSize: sameSize,
     });
     tempResult = "";
+    tempScore = 0;
+    sameSize = false;
   }
+  result.results = result.results.sort(((a, b) => b.score - a.score));
 
   return res.status(200).send(result);
 };

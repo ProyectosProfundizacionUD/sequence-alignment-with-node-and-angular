@@ -86,9 +86,14 @@ export class CreateSequenceComponent implements OnInit {
     });
 
     this.registerSequence.organism = this.registerSequence.sequence
+    .split('\n')[0]
+    .split('|')[4]
+    .split(',')[0]
+    .slice(1, this.registerSequence.sequence
       .split('\n')[0]
       .split('|')[4]
-      .split(',')[0];
+      .split(',')[0].length
+      );
 
     console.log(this.registerSequence.sequence);
   }

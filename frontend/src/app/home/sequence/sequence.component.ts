@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SequenceService } from 'src/app/services/sequence.service';
+import { UtilsService } from 'src/app/services/utils.service';
 
 @Component({
   selector: 'app-sequence',
@@ -12,7 +13,8 @@ export class SequenceComponent implements OnInit {
   constructor(
     private _activeRoute: ActivatedRoute,
     private _sequenceService: SequenceService,
-    private _router: Router
+    private _router: Router,
+    private _utilitiesServices: UtilsService
   ) { }
 
   ngOnInit(): void {
@@ -21,7 +23,7 @@ export class SequenceComponent implements OnInit {
         this.sequenceData = res[0];
       },
       (err) => {
-        console.log(err); //! por cambiar!!!
+        this._utilitiesServices.openSnackBarError("Ha ocurrido un error al obtener las secuencias");
       }
     );
   }

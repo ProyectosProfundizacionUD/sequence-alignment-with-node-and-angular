@@ -27,7 +27,7 @@ body::-webkit-scrollbar:horizontal {
 }
 
 body::-webkit-scrollbar-thumb {
-  background-color: #204750;
+  background-color: #383d38;
   border-radius: 20px;
   border: 0;
 }

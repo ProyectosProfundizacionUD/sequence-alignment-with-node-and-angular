@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const AlignmentController = require('../controllers/alignments');
 
-router.post("/", AlignmentController.LocalAndGlobalAlignment);
+router.post("/:filter?", AlignmentController.LocalAndGlobalAlignment);
 
 module.exports = router;

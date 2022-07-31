@@ -10,3 +10,26 @@
   display: flex;
   justify-content: center;
 }
+
+p::-webkit-scrollbar {
+  -webkit-appearance: none;
+}
+
+p::-webkit-scrollbar:vertical {
+  width: 8px;
+}
+
+p::-webkit-scrollbar-button:increment,
+.sidebar::-webkit-scrollbar-button {
+  display: none;
+}
+
+p::-webkit-scrollbar:horizontal {
+  height: 10px;
+}
+
+p::-webkit-scrollbar-thumb {
+  background-color: #383d38;
+  border-radius: 20px;
+  border: 0;
+}
