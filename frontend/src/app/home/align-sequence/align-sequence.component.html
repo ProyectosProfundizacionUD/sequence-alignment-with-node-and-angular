@@ -184,7 +184,8 @@
           <div>
             <mat-form-field appearance="fill">
               <mat-label>Seleccionar la secuencia</mat-label>
-              <mat-select>
+              <mat-select 
+              [(ngModel)]="this.identifier">
                 <mat-option
                   *ngFor="let sequence of sequences"
                   [value]="sequence.identifier"
@@ -192,6 +193,59 @@
                   {{ sequence.organism }}
                 </mat-option>
               </mat-select>
+            </mat-form-field>
+          </div>
+          <div *ngIf="this.showLocal">
+            <p class="fs-6 mt-3">
+              Digite los rangos iniciales y finales para el alineamiento local
+            </p>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>X1</mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.x1"
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>X2</mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.x2"
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>y1</mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.y1"
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label>y2</mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.y2"
+              />
             </mat-form-field>
           </div>
           <button

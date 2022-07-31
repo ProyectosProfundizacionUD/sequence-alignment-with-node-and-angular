@@ -10,12 +10,11 @@ const LocalAndGlobalAlignment = (req, res) => {
 
   //validar  con expresion regular
 
-  //pasar a uppercase
   sequence = sequence.toUpperCase()
 
   ValidateHeaders(headers) == true
-    ? LocalAlignment(headers, sequence, organism, res)
-    : GlobalAlignment(sequence, organism, res);
+    ? LocalAlignment(headers, sequence, organism, res, req.params["filter"])
+    : GlobalAlignment(sequence, organism, res, req.params["filter"]);
 };
 
 const ValidateHeaders = (headers) => {
@@ -28,8 +27,9 @@ const ValidateHeaders = (headers) => {
   return false;
 };
 
-const LocalAlignment = async (headers, sequence, organism, res) => {
-  let sequences = await Sequence.find();
+const LocalAlignment = async (headers, sequence, organism, res, filter) => {
+  let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
+
   if (!sequences || sequences.length === 0)
     return res.status(500).send("an error was happen while we get the data");
 
@@ -103,12 +103,12 @@ const LocalAlignment = async (headers, sequence, organism, res) => {
     sameSize = false;
   }
   result.results = result.results.sort(((a, b) => b.score - a.score));
-  
+
   return res.status(200).send(result);
 };
 
-const GlobalAlignment = async (sequence, organism, res) => {
-  let sequences = await Sequence.find();
+const GlobalAlignment = async (sequence, organism, res, filter) => {
+  let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
   if (!sequences || sequences.length === 0)
     return res.status(500).send("an error was happen while we get the data");
 

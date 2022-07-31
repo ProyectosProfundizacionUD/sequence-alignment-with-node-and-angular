@@ -12,16 +12,17 @@ export class AlignSequenceComponent implements OnInit {
   panelOpenState = false;
   isChargingFile: Boolean = true;
   sequences: any = [];
+  identifier: String = '';
   resultSequences: any = [];
   originSequenceToPrint: any = [];
   selectAlignment: String = 'default';
   showLocalWithBase: Boolean = false;
+  showLocal: Boolean = false;
   showResults: boolean = false;
   entryHeaders: any = {};
   sequenceToAlign: any;
   sequenceFasta: any = {};
   regularExpression = /^[GCTAN]{1,60}$/i;
-
 
   selectedFile: any;
   sequenceImg: any = '';
@@ -47,16 +48,17 @@ export class AlignSequenceComponent implements OnInit {
   }
 
   async startAlignment() {
-    if (
-        !this.sequenceToAlign.sequence ||
-        this.selectAlignment == "default"
-      ) {
-      this._utilitiesServices.openSnackBarError("Debes ingresar una secuencia y seleccionar una opción!");
+    if (!this.sequenceToAlign.sequence || this.selectAlignment == 'default') {
+      this._utilitiesServices.openSnackBarError(
+        'Debes ingresar una secuencia y seleccionar una opción!'
+      );
     } else {
-      if(!/^[GCTAMN]{1,60}$/i.test(this.sequenceToAlign.sequence)){
-        this._utilitiesServices.openSnackBarError("Los unicos caracteres validos son ACGTMN con una longitud maxima de 60 nucleotidos!");
+      if (!/^[GCTAMN]{1,60}$/i.test(this.sequenceToAlign.sequence)) {
+        this._utilitiesServices.openSnackBarError(
+          'Los unicos caracteres validos son ACGTMN con una longitud maxima de 60 nucleotidos!'
+        );
       } else {
-        if(this.selectAlignment == "GlobalWithBase"){
+        if (this.selectAlignment == 'GlobalWithBase') {
           this.clear();
           this._align.align(this.sequenceToAlign).subscribe(
             (res) => {
@@ -68,40 +70,86 @@ export class AlignSequenceComponent implements OnInit {
               this._utilitiesServices.openSnackBarError(err.error);
             }
           );
-        } else if(this.selectAlignment == "LocalWithBase") {
-          this.clear();
-          await this._align.localAlign(this.sequenceToAlign, this.entryHeaders)
-            .then(res => {
-              console.log(res);            
-              this.originSequenceToPrint = res.sequence.split('');
-              this.dataToArray(res.results);
-              this.showResults = true;
-            })
-            .catch(err => {
-              this._utilitiesServices.openSnackBarError("Ha ocurrido un error al alinear las secuencias");
-            })
+        } else if (this.selectAlignment == 'LocalWithBase') {
+          if(this.localRangeValidations()){
+            this.clear();
+            await this._align
+              .localAlign(this.sequenceToAlign, this.entryHeaders)
+              .then((res) => {
+                console.log(res);
+                this.originSequenceToPrint = res.sequence.split('');
+                this.dataToArray(res.results);
+                this.showResults = true;
+              })
+              .catch((err) => {
+                this._utilitiesServices.openSnackBarError(
+                  'Ha ocurrido un error al alinear las secuencias'
+                );
+              });
+          }          
         }
       }
     }
   }
-  startAlignmentWithOneSequence(){
-    switch (this.selectAlignment) {
-      case "Global":
-        console.log("Global not implemented yet");
-        break;
-      case "Local":
-        console.log("Local not implemented yet");
-        break;
-      case "DotPlot":
-        console.log("DotPlot not implemented yet");
-        break;
-      case "NeedlemanAndWunsch":
-        console.log("NeedlemanAndWunsch not implemented yet");
-        break;
-        
-      default:
-        this._utilitiesServices.openSnackBarError("No ha seleccionado una opción");
-        break;
+  async startAlignmentWithOneSequence() {
+    if (!this.sequenceToAlign.sequence || 
+        this.selectAlignment == 'default' ||
+        !this.identifier ) {
+      this._utilitiesServices.openSnackBarError(
+        'Debes ingresar una secuencia, seleccionar un organismo a comparar y escoger una opción!'
+      );
+    } else {
+      if (!/^[GCTAMN]{1,60}$/i.test(this.sequenceToAlign.sequence)) {
+        this._utilitiesServices.openSnackBarError(
+          'Los unicos caracteres validos son ACGTMN con una longitud maxima de 60 nucleotidos!'
+        );
+      } else { 
+        if(this.localRangeValidations()){
+          this.clear();
+          switch (this.selectAlignment) {
+            case 'Global':
+              this._align
+                .alignWitOneSequence(this.sequenceToAlign, this.identifier)
+                .subscribe(
+                  (res) => {
+                    this.originSequenceToPrint = res.sequence.split('');
+                    this.dataToArray(res.results);
+                    this.showResults = true;
+                  },
+                  (err) => {
+                    this._utilitiesServices.openSnackBarError(err.error);
+                  }
+                );
+              break;
+            case 'Local':
+              await this._align
+                .localAlignWitOneSequence(this.sequenceToAlign, this.entryHeaders, this.identifier)
+                .then((res) => {
+                  console.log(res);
+                  this.originSequenceToPrint = res.sequence.split('');
+                  this.dataToArray(res.results);
+                  this.showResults = true;
+                })
+                .catch((err) => {
+                  this._utilitiesServices.openSnackBarError(
+                    'Ha ocurrido un error al alinear las secuencias'
+                  );
+                });
+              break;
+            case 'DotPlot':
+              console.log('DotPlot not implemented yet');
+              break;
+            case 'NeedlemanAndWunsch':
+              console.log('NeedlemanAndWunsch not implemented yet');
+              break;
+            default:
+              this._utilitiesServices.openSnackBarError(
+                'No ha seleccionado una opción correcta'
+              );
+              break;
+          }
+        }
+      }
     }
   }
 
@@ -111,7 +159,10 @@ export class AlignSequenceComponent implements OnInit {
 
     if (this.selectAlignment == 'LocalWithBase') {
       this.showLocalWithBase = true;
+    } else if (this.selectAlignment == 'Local') {
+      this.showLocal = true;
     } else {
+      this.showLocal = false;
       this.showLocalWithBase = false;
     }
   }
@@ -124,10 +175,50 @@ export class AlignSequenceComponent implements OnInit {
     this.resultSequences = data;
   }
 
-  clear(){
+  clear() {
     this.showResults = false;
     this.originSequenceToPrint = [];
     this.resultSequences = [];
+  }
+
+  localRangeValidations(){
+    if(
+      this.entryHeaders.x1 == undefined ||
+      this.entryHeaders.x2 == undefined ||
+      this.entryHeaders.y1 == undefined ||
+      this.entryHeaders.y2 == undefined
+      ){
+        this._utilitiesServices.openSnackBarError(
+          'Debes ingresar todos los rangos!'
+        );
+      return false
+    }
+    if(
+      this.entryHeaders.x1 > 60 ||
+      this.entryHeaders.x2 > 60 ||
+      this.entryHeaders.y1 > 60 ||
+      this.entryHeaders.y2 > 60 ||
+      this.entryHeaders.x1 < 0 ||
+      this.entryHeaders.x2 < 0 ||
+      this.entryHeaders.y1 < 0 ||
+      this.entryHeaders.y2 < 0       
+    ){      
+      this._utilitiesServices.openSnackBarError(
+        'Los rangos no pueden ser mayores a 60 o menores a 0'
+      );
+      return false;
+    }
+    if(
+      this.entryHeaders.x1 > this.entryHeaders.x2 ||
+      this.entryHeaders.y1 > this.entryHeaders.y2
+    ){
+      this._utilitiesServices.openSnackBarError(
+        'Los rangos iniciales no pueden ser mayores a los finales'
+      );
+      return false;
+    }
+
+    return true;
   }
 
   async uploadFasta(event: any) {
@@ -146,10 +237,9 @@ export class AlignSequenceComponent implements OnInit {
       .split('\n')[0]
       .split('|')[4]
       .split(',')[0]
-      .slice(1, this.sequenceFasta
-        .split('\n')[0]
-        .split('|')[4]
-        .split(',')[0].length
-        );
+      .slice(
+        1,
+        this.sequenceFasta.split('\n')[0].split('|')[4].split(',')[0].length
+      );
   }
 }
