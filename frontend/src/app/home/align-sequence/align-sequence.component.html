@@ -25,7 +25,6 @@
       </section>
     </mat-card-header>
     <mat-card-content>
-
       <mat-form-field appearance="fill" class="w-100">
         <mat-label>Organismo</mat-label>
         <input matInput [(ngModel)]="this.sequenceToAlign.organism" />
@@ -52,6 +51,7 @@
             matInput
             required
             [(ngModel)]="this.sequenceToAlign.sequence"
+            pattern="{{this.regularExpression}}"
           ></textarea>
         </mat-form-field>
       </div>
@@ -62,71 +62,84 @@
             <mat-panel-title> Comparar con la base </mat-panel-title>
           </mat-expansion-panel-header>
 
-          <section class="example-section">
+          <section class="example-section mb-2">
             <mat-radio-group [(ngModel)]="this.selectAlignment">
               <mat-radio-button
                 class="example-margin"
                 (click)="this.selectAlignmentType('GlobalWithBase')"
-                [value]="false"
+                [value]="'GlobalWithBase'"
                 >Alineamiento Global</mat-radio-button
               >
               <br />
               <mat-radio-button
                 class="example-margin"
                 (click)="this.selectAlignmentType('LocalWithBase')"
-                [value]="true"
+                [value]="'LocalWithBase'"
                 >Alineamiento Local</mat-radio-button
               >
             </mat-radio-group>
           </section>
           <div *ngIf="this.showLocalWithBase">
-            <p class="fs-6 mt-3">Digite los rangos iniciales y finales para el alineamiento local</p>
+            <p class="fs-6 mt-3">
+              Digite los rangos iniciales y finales para el alineamiento local
+            </p>
             <mat-form-field class="example-full-width" appearance="fill">
               <mat-label>X1</mat-label>
-              <input 
-              type="number" 
-              matInput 
-              placeholder="0" 
-              value="0"
-              min="0"
-              max="60"
-              >
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.x1"
+              />
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
               <mat-label>X2</mat-label>
-              <input 
-              type="number" 
-              matInput 
-              placeholder="0" 
-              value="0"
-              min="0"
-              max="60"
-              >
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.x2"
+              />
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
               <mat-label>y1</mat-label>
-              <input 
-              type="number" 
-              matInput 
-              placeholder="0" 
-              value="0"
-              min="0"
-              max="60"
-              >
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.y1"
+              />
             </mat-form-field>
             <mat-form-field class="example-full-width" appearance="fill">
               <mat-label>y2</mat-label>
-              <input 
-              type="number" 
-              matInput 
-              placeholder="0" 
-              value="0"
-              min="0"
-              max="60"
-              >
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                min="0"
+                max="60"
+                [(ngModel)]="this.entryHeaders.y2"
+              />
             </mat-form-field>
           </div>
 
+          <button
+            (click)="this.startAlignment()"
+            class="button"
+            mat-raised-button
+          >
+            Alinear Secuencias!
+          </button>
         </mat-expansion-panel>
         <mat-expansion-panel
           (opened)="panelOpenState = true"
@@ -136,77 +149,118 @@
             <mat-panel-title> Comparar con una secuencia </mat-panel-title>
           </mat-expansion-panel-header>
 
-          <mat-form-field appearance="fill">
-            <mat-label>Seleccionar la secuencia</mat-label>
-            <mat-select>
-              <mat-option
-                *ngFor="let sequence of sequences"
-                [value]="sequence.identifier"
+          <section class="example-section mb-2">
+            <mat-radio-group [(ngModel)]="this.selectAlignment">
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('Global')"
+                [value]="'Global'"
+                >Alineamiento Global</mat-radio-button
               >
-                {{ sequence.organism }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+              <br />
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('Local')"
+                [value]="'Local'"
+                >Alineamiento Local</mat-radio-button
+              >
+              <br />
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('DotPlot')"
+                [value]="'DotPlot'"
+                >Dot Plot</mat-radio-button
+              >
+              <br />
+              <mat-radio-button
+                class="example-margin"
+                (click)="this.selectAlignmentType('NeedlemanAndWunsch')"
+                [value]="'NeedlemanAndWunsch'"
+                >Needleman and Wunsch</mat-radio-button
+              >                            
+            </mat-radio-group>
+          </section>
 
+          <div>
+            <mat-form-field appearance="fill">
+              <mat-label>Seleccionar la secuencia</mat-label>
+              <mat-select>
+                <mat-option
+                  *ngFor="let sequence of sequences"
+                  [value]="sequence.identifier"
+                >
+                  {{ sequence.organism }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <button
+            (click)="this.startAlignmentWithOneSequence()"
+            class="button"
+            mat-raised-button
+          >
+            Alinear Secuencias!
+          </button>
         </mat-expansion-panel>
       </mat-accordion>
     </mat-card-content>
-    <mat-card-actions>
-      <button (click)="this.startAlignment()" class="button" mat-raised-button>
-        Alinear Secuencias!
-      </button>
-    </mat-card-actions>
+    <mat-card-actions> </mat-card-actions>
   </mat-card>
 
   <div *ngIf="this.showResults">
     <mat-accordion>
-      <mat-expansion-panel 
-        hideToggle
-        *ngFor="let sequence of resultSequences"
-      >
+      <mat-expansion-panel hideToggle *ngFor="let sequence of resultSequences">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            {{sequence.organism}}
+            {{ sequence.organism }}
           </mat-panel-title>
-          <p><b>Score:</b> {{sequence.score}}</p>
+          <p><b>Score:</b> {{ sequence.score }}</p>
         </mat-expansion-panel-header>
         <div class="overflow-auto">
           <p *ngIf="sequence.sameSize">
-            Porcentaje de Similitud: 
+            Porcentaje de Similitud:
             {{
-              ((sequence.score * 100)/sequence.sequence.length).toFixed(1)
-            }}%  
+              ((sequence.score * 100) / sequence.sequence.length).toFixed(1)
+            }}%
           </p>
           <table class="table">
             <tbody>
               <tr>
-                <th scope="row">1</th>
-                <td *ngFor="let item  of this.originSequenceToPrint">
-                  {{item}}
+                <th scope="row">
+                  {{
+                    !this.sequenceToAlign.organism
+                      ? "Organismo Ingresado"
+                      : this.sequenceToAlign.organism.split(" ")[0] +
+                        " " +
+                        this.sequenceToAlign.organism.split(" ")[1]
+                  }}
+                </th>
+                <td *ngFor="let item of this.originSequenceToPrint">
+                  {{ item }}
                 </td>
               </tr>
               <tr>
-                <th scope="row">2</th>
-                <td 
-                  *ngFor="let item  of sequence.alignment" 
-                  [ngClass]="item == 0 ? 'table-danger' : 'table-info' "
-                >
-                </td>
+                <th scope="row">
+                  <br />
+                </th>
+                <td
+                  *ngFor="let item of sequence.alignment"
+                  [ngClass]="item == 0 ? 'table-danger' : 'table-info'"
+                ></td>
               </tr>
               <tr>
-                <th scope="row">3</th>
-                <td *ngFor="let item  of sequence.sequence">
-                  {{item}}
+                <th scope="row">
+                  {{ sequence.organism.split(" ")[0] }}
+                  {{ sequence.organism.split(" ")[1] }}
+                </th>
+                <td *ngFor="let item of sequence.sequence">
+                  {{ item }}
                 </td>
               </tr>
             </tbody>
           </table>
-  
         </div>
-                
       </mat-expansion-panel>
     </mat-accordion>
   </div>
-
-
 </div>

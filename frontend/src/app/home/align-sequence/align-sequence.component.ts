@@ -1,6 +1,4 @@
 import { Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { Router } from '@angular/router';
 import { AlignService } from 'src/app/services/align.service';
 import { SequenceService } from 'src/app/services/sequence.service';
 import { UtilsService } from 'src/app/services/utils.service';
@@ -8,7 +6,7 @@ import { UtilsService } from 'src/app/services/utils.service';
 @Component({
   selector: 'app-align-sequence',
   templateUrl: './align-sequence.component.html',
-  styleUrls: ['./align-sequence.component.css']
+  styleUrls: ['./align-sequence.component.css'],
 })
 export class AlignSequenceComponent implements OnInit {
   panelOpenState = false;
@@ -16,23 +14,22 @@ export class AlignSequenceComponent implements OnInit {
   sequences: any = [];
   resultSequences: any = [];
   originSequenceToPrint: any = [];
-  selectAlignment: String = "default";
+  selectAlignment: String = 'default';
   showLocalWithBase: Boolean = false;
   showResults: boolean = false;
-
-
-  sequenceFasta: any = {};
+  entryHeaders: any = {};
   sequenceToAlign: any;
+  sequenceFasta: any = {};
+  regularExpression = /^[GCTAN]{1,60}$/i;
 
 
-  
   selectedFile: any;
   sequenceImg: any = '';
 
   constructor(
     private _sequence: SequenceService,
     private _align: AlignService,
-    private _utilitiesServices: UtilsService,
+    private _utilitiesServices: UtilsService
   ) {
     this.sequenceToAlign = {};
     this.selectedFile = '';
@@ -44,42 +41,93 @@ export class AlignSequenceComponent implements OnInit {
         this.sequences = res;
       },
       (err) => {
-        console.log(err);
-      }
-    );    
-  }
-
-  startAlignment(){
-    this._align.align(this.sequenceToAlign).subscribe(
-      (res) => {        
-        this.originSequenceToPrint = res.sequence.split("");
-        this.dataToArray(res.results);        
-        this.showResults = true;
-      },
-      (err) => {
-        console.log(err);        
+        this._utilitiesServices.openSnackBarError(err.error);
       }
     );
   }
 
-  selectAlignmentType(type: String){
-    this.selectAlignment = type;
-    console.log(this.selectAlignment);
-    
-    if(this.selectAlignment == "LocalWithBase"){
-      this.showLocalWithBase = true
+  async startAlignment() {
+    if (
+        !this.sequenceToAlign.sequence ||
+        this.selectAlignment == "default"
+      ) {
+      this._utilitiesServices.openSnackBarError("Debes ingresar una secuencia y seleccionar una opción!");
     } else {
-      this.showLocalWithBase = false
+      if(!/^[GCTAMN]{1,60}$/i.test(this.sequenceToAlign.sequence)){
+        this._utilitiesServices.openSnackBarError("Los unicos caracteres validos son ACGTMN con una longitud maxima de 60 nucleotidos!");
+      } else {
+        if(this.selectAlignment == "GlobalWithBase"){
+          this.clear();
+          this._align.align(this.sequenceToAlign).subscribe(
+            (res) => {
+              this.originSequenceToPrint = res.sequence.split('');
+              this.dataToArray(res.results);
+              this.showResults = true;
+            },
+            (err) => {
+              this._utilitiesServices.openSnackBarError(err.error);
+            }
+          );
+        } else if(this.selectAlignment == "LocalWithBase") {
+          this.clear();
+          await this._align.localAlign(this.sequenceToAlign, this.entryHeaders)
+            .then(res => {
+              console.log(res);            
+              this.originSequenceToPrint = res.sequence.split('');
+              this.dataToArray(res.results);
+              this.showResults = true;
+            })
+            .catch(err => {
+              this._utilitiesServices.openSnackBarError("Ha ocurrido un error al alinear las secuencias");
+            })
+        }
+      }
     }
-      
+  }
+  startAlignmentWithOneSequence(){
+    switch (this.selectAlignment) {
+      case "Global":
+        console.log("Global not implemented yet");
+        break;
+      case "Local":
+        console.log("Local not implemented yet");
+        break;
+      case "DotPlot":
+        console.log("DotPlot not implemented yet");
+        break;
+      case "NeedlemanAndWunsch":
+        console.log("NeedlemanAndWunsch not implemented yet");
+        break;
+        
+      default:
+        this._utilitiesServices.openSnackBarError("No ha seleccionado una opción");
+        break;
+    }
   }
 
-  dataToArray(data: any){
+  selectAlignmentType(type: String) {
+    this.selectAlignment = type;
+    console.log(this.selectAlignment);
+
+    if (this.selectAlignment == 'LocalWithBase') {
+      this.showLocalWithBase = true;
+    } else {
+      this.showLocalWithBase = false;
+    }
+  }
+
+  dataToArray(data: any) {
     for (let i = 0; i < data.length; i++) {
-      data[i].sequence = data[i].sequence.split("");
-      data[i].alignment = data[i].alignment.split("");
-    }    
+      data[i].sequence = data[i].sequence.split('');
+      data[i].alignment = data[i].alignment.split('');
+    }
     this.resultSequences = data;
+  }
+
+  clear(){
+    this.showResults = false;
+    this.originSequenceToPrint = [];
+    this.resultSequences = [];
   }
 
   async uploadFasta(event: any) {
@@ -91,13 +139,17 @@ export class AlignSequenceComponent implements OnInit {
     });
 
     this.sequenceToAlign.sequence = this.sequenceFasta
-      .split("\n")[1].substring(0, 60)
+      .split('\n')[1]
+      .substring(0, 60);
 
     this.sequenceToAlign.organism = this.sequenceFasta
       .split('\n')[0]
       .split('|')[4]
-      .split(',')[0];
-
-    console.log(this.sequenceToAlign.sequence);
+      .split(',')[0]
+      .slice(1, this.sequenceFasta
+        .split('\n')[0]
+        .split('|')[4]
+        .split(',')[0].length
+        );
   }
 }

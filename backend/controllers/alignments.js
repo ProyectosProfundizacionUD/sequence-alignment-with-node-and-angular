@@ -103,7 +103,7 @@ const LocalAlignment = async (headers, sequence, organism, res) => {
     sameSize = false;
   }
   result.results = result.results.sort(((a, b) => b.score - a.score));
-
+  
   return res.status(200).send(result);
 };
 

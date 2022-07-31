@@ -14,4 +14,23 @@ export class AlignService {
   align(data: any){
     return this._httpClient.post<any>(`${ this.env }align`, data);
   }
+  async localAlign(data: any, entryHeaders: any){
+    const response = await fetch(`${ this.env }align`, {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'x1': entryHeaders.x1,
+        'x2': entryHeaders.x2,
+        'y1': entryHeaders.y1,
+        'y2': entryHeaders.y2,
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
 }
