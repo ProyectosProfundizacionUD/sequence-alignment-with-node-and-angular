@@ -25,6 +25,12 @@
       </section>
     </mat-card-header>
     <mat-card-content>
+
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Organismo</mat-label>
+        <input matInput [(ngModel)]="this.sequenceToAlign.organism" />
+      </mat-form-field>
+
       <div class="mb-3" *ngIf="this.isChargingFile">
         <div class="input-group">
           <label for="upload-fasta"></label>
@@ -45,7 +51,7 @@
           <textarea
             matInput
             required
-            [(ngModel)]="registerSequence.sequence"
+            [(ngModel)]="this.sequenceToAlign.sequence"
           ></textarea>
         </mat-form-field>
       </div>
@@ -146,9 +152,61 @@
       </mat-accordion>
     </mat-card-content>
     <mat-card-actions>
-      <button (click)="startAlignment()" class="button" mat-raised-button>
-        Crear
+      <button (click)="this.startAlignment()" class="button" mat-raised-button>
+        Alinear Secuencias!
       </button>
     </mat-card-actions>
   </mat-card>
+
+  <div *ngIf="this.showResults">
+    <mat-accordion>
+      <mat-expansion-panel 
+        hideToggle
+        *ngFor="let sequence of resultSequences"
+      >
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            {{sequence.organism}}
+          </mat-panel-title>
+          <p><b>Score:</b> {{sequence.score}}</p>
+        </mat-expansion-panel-header>
+        <div class="overflow-auto">
+          <p *ngIf="sequence.sameSize">
+            Porcentaje de Similitud: 
+            {{
+              ((sequence.score * 100)/sequence.sequence.length).toFixed(1)
+            }}%  
+          </p>
+          <table class="table">
+            <tbody>
+              <tr>
+                <th scope="row">1</th>
+                <td *ngFor="let item  of this.originSequenceToPrint">
+                  {{item}}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">2</th>
+                <td 
+                  *ngFor="let item  of sequence.alignment" 
+                  [ngClass]="item == 0 ? 'table-danger' : 'table-info' "
+                >
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">3</th>
+                <td *ngFor="let item  of sequence.sequence">
+                  {{item}}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+  
+        </div>
+                
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
+
+
 </div>
