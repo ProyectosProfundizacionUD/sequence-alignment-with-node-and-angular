@@ -1,4 +1,5 @@
 const Sequence = require("../models/sequence");
+const Methods = require('../Methods/alignmentMethods');
 
 const LocalAndGlobalAlignment = (req, res) => {
   var headers = req.headers;
@@ -159,4 +160,36 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
   return res.status(200).send(result);
 };
 
-module.exports = { LocalAndGlobalAlignment };
+const NeedlemanAndWunsch = async (req, res) => {
+  let headers = req.headers;
+  let organism = req.body.organism;
+  let sequence = req.body.sequence;
+  let gaps = req.body.gaps;
+  let coincidence = req.body.coincidence;
+  let difference = req.body.difference;
+  let identifier = req.params["filter"];
+
+  if (!sequence || sequence === "")
+    return res.status(400).send("You must send a valid sequence");
+
+  sequence = sequence.toUpperCase()
+
+  let sequenceToAlign = await Sequence.findOne({ identifier: new RegExp(identifier, "i") });
+  if (!sequenceToAlign || sequenceToAlign.length === 0)
+    return res.status(500).send("an error was happen while we get the data");
+
+  let matrix = Methods.buildNeedlemanMatrix(sequence, sequenceToAlign.sequence, gaps);
+
+  matrix = Methods.resolveNeedlemanMatrix(matrix, coincidence, difference);
+
+  let alignmentPath = Methods.buildTraceBack(matrix, coincidence, difference, gaps);
+
+  return res.status(201).send({
+    traceBack: alignmentPath[0],
+    score: alignmentPath[2],
+    traceBackPositions: alignmentPath[1],
+    matrix: matrix
+  })
+}
+
+module.exports = { LocalAndGlobalAlignment, NeedlemanAndWunsch };
