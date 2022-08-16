@@ -1,8 +1,6 @@
 const buildNeedlemanMatrix = (entrySequence, dbSequence, gaps) => {
   let matrix = [];
   let tempMatrix = [];
-  //entrySequence = "ATTGC"; // ! to delete
-  //dbSequence = "AGGC"; // ! to delete
   for (let i = 0; i < dbSequence.length + 2; i++) {
     for (let j = 0; j < entrySequence.length + 2; j++) {
       if (i == 0 && j == 0) {
@@ -59,10 +57,8 @@ const takeBigger = (s, dg, left, up) => {
   return (selectedValue = Math.max(...tempArray));
 };
 const takeBiggerPosition = (i, j, matrix) => {
-  let newI = 0;
-  let newJ = 0;
-  let FromDbSequence = "";
-  let entrySequence = "";
+  let result = [];
+  console.log(`${i} ${j} ${matrix[i][j]}`);
   let tempArray = [
     matrix[i - 1][j - 1], //diagonal
     matrix[i - 1][j], // left
@@ -70,29 +66,53 @@ const takeBiggerPosition = (i, j, matrix) => {
   ];
   let selectedValue = Math.max(...tempArray);
   let indexSelected = tempArray.findIndex((value) => value == selectedValue);
+
+  if(i != 2 && j != 2) {
+    result = doACase(indexSelected, matrix, i, j);
+  } else if (i == 2 && j == 2) {
+    result = doACase(0, matrix, i, j);
+  } else if (i == 2) {
+    console.log(`Entro if 2 con i=${i}, j=${j}, valor ${matrix[i][j]}`);
+    result = doACase(2, matrix, i, j);
+  } else if (j == 2) {
+    result = doACase(1, matrix, i, j);
+  }
+  
+  return [result[0], result[1], result[2], result[3]];
+};
+const doACase = (indexSelected, matrix, i, j) => {
+  let newI = 0;
+  let newJ = 0;
+  let FromDbSequence = "";
+  let entrySequence = "";
   switch (indexSelected) {
     case 0:
       newI = i - 1;
       newJ = j - 1;
-      FromDbSequence = matrix[0][j];
-      entrySequence = matrix[i][0];
+      FromDbSequence = matrix[i][0];
+      entrySequence = matrix[0][j];
+
+      console.log(`case 0 i=${i}, j=${j}, ${entrySequence} ${FromDbSequence}`);
       break;
     case 1:
       newI = i - 1;
       newJ = j;
       FromDbSequence = matrix[i][0];
       entrySequence = "-";
+
+      console.log(`case 1 i=${i}, j=${j}, ${entrySequence} ${FromDbSequence}`);
       break;
     case 2:
       newI = i;
       newJ = j - 1;
       FromDbSequence = "-";
       entrySequence = matrix[0][j];
+      
+      console.log(`case 2 i=${i}, j=${j}, ${entrySequence} ${FromDbSequence}`);
       break;
   }
-
   return [newI, newJ, entrySequence, FromDbSequence];
-};
+}
 const buildTraceBack = (matrix, coincidence, difference, gaps) => {
   let entrySequence = "";
   let dbSequence = "";
