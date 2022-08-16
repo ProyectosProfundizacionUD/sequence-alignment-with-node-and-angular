@@ -195,6 +195,45 @@
               </mat-select>
             </mat-form-field>
           </div>
+
+
+          <div *ngIf="this.showOptionsNeedleman">
+            <p class="fs-6 mt-3">
+              Digite el valor de los gaps, las coincidencias y las diferencias.
+            </p>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label><b>A</b> - <b>-</b></mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                [(ngModel)]="this.sequenceToAlign.gaps"
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label><b>A</b> - <b>A</b></mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                [(ngModel)]="this.sequenceToAlign.coincidence"
+              />
+            </mat-form-field>
+            <mat-form-field class="example-full-width" appearance="fill">
+              <mat-label><b>A</b> - <b>T</b></mat-label>
+              <input
+                type="number"
+                matInput
+                placeholder="0"
+                value="0"
+                [(ngModel)]="this.sequenceToAlign.difference"
+              />
+            </mat-form-field>
+          </div>
+
+
           <div *ngIf="this.showLocal">
             <p class="fs-6 mt-3">
               Digite los rangos iniciales y finales para el alineamiento local
@@ -317,4 +356,68 @@
       </mat-expansion-panel>
     </mat-accordion>
   </div>
+</div>
+
+<div *ngIf="this.showResultsNeedleman" class="overflow-auto">
+  <div class="overflow-auto">
+    <p>
+      <b>Score: </b>{{this.resultsNeedleman.score}}
+    </p>
+    <br />
+    <p>
+      <b>Size: </b>{{this.resultsNeedleman.traceBack[0].size}}
+    </p>
+    <table class="table">
+      <tbody>
+        <tr>
+          <th scope="row">
+            {{
+              !this.resultsNeedleman.traceBack[0].organism
+                ? "Organismo Ingresado"
+                : this.resultsNeedleman.traceBack[0].organism.split(" ")[0]
+            }}
+          </th>
+          <td *ngFor="let item of this.resultsNeedleman.traceBack[0].sequence.split('')">
+            {{ item }}
+          </td>
+        </tr>
+        <tr>
+          <th scope="row">
+            <br />
+          </th>
+          <td
+            *ngFor="let item of this.resultsNeedleman.traceBack[0].sequence.split(''); let i = index"
+            [ngClass]="this.resultsNeedleman.traceBack[0].sequence[i] != this.resultsNeedleman.traceBack[1].sequence[i] 
+            ? 'table-danger' 
+            : 'table-info'"
+          > 1</td>
+        </tr>
+        <tr>
+          <th scope="row">
+            {{ this.resultsNeedleman.traceBack[1].organism.split(" ")[0] }}
+          </th>
+          <td *ngFor="let item of this.resultsNeedleman.traceBack[1].sequence.split('')">
+            {{ item }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p>
+      <b>Size: </b>{{this.resultsNeedleman.traceBack[1].size}}
+    </p>
+  </div>
+
+  <table class="table table-striped overflow-auto">
+    <tbody class="overflow-auto">
+      <tr *ngFor="let rows of this.resultsNeedleman.matrix; let i = index;">
+        <td 
+          *ngFor="let fields of rows; let j = index;"
+          scope="col"
+          [ngClass]="{ 'table-warning': this.validatePositions(i, j) , 'fw-bold': i == 0 || j == 0}"
+        >
+          {{fields}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>

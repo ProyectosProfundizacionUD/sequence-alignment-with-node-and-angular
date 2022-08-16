@@ -55,4 +55,7 @@ export class AlignService {
     });
     return response.json();
   }
+  alignWithNeedlemanAndWunsch(data: any, identifier: String){
+    return this._httpClient.post<any>(`${ this.env }needleman-and-wunsch/${identifier}`, data);
+  }
 }

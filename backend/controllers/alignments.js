@@ -161,7 +161,6 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
 };
 
 const NeedlemanAndWunsch = async (req, res) => {
-  let headers = req.headers;
   let organism = req.body.organism;
   let sequence = req.body.sequence;
   let gaps = req.body.gaps;
@@ -171,6 +170,16 @@ const NeedlemanAndWunsch = async (req, res) => {
 
   if (!sequence || sequence === "")
     return res.status(400).send("You must send a valid sequence");
+
+  if(
+      !coincidence ||
+      coincidence === "" ||
+      !difference ||
+      difference === "" ||
+      !gaps ||
+      gaps  === ""
+    )
+    return res.status(400).send("You need to send all fields");
 
   sequence = sequence.toUpperCase()
 
@@ -185,7 +194,19 @@ const NeedlemanAndWunsch = async (req, res) => {
   let alignmentPath = Methods.buildTraceBack(matrix, coincidence, difference, gaps);
 
   return res.status(201).send({
-    traceBack: alignmentPath[0],
+    traceBack: [
+      {
+        organism: organism,
+        sequence: alignmentPath[0][0],
+        size: sequence.length
+
+      },
+      {
+        organism: sequenceToAlign.organism,
+        sequence: alignmentPath[0][1],
+        size: sequenceToAlign.sequence.length
+      }
+    ],
     score: alignmentPath[2],
     traceBackPositions: alignmentPath[1],
     matrix: matrix

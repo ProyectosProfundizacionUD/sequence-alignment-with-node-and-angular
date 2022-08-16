@@ -19,6 +19,9 @@ export class AlignSequenceComponent implements OnInit {
   showLocalWithBase: Boolean = false;
   showLocal: Boolean = false;
   showResults: boolean = false;
+  showResultsNeedleman: boolean = false;
+  showOptionsNeedleman: boolean = false;
+  resultsNeedleman: any = {};
   entryHeaders: any = {};
   sequenceToAlign: any;
   sequenceFasta: any = {};
@@ -113,6 +116,7 @@ export class AlignSequenceComponent implements OnInit {
               .alignWitOneSequence(this.sequenceToAlign, this.identifier)
               .subscribe(
                 (res) => {
+                  this.showResultsNeedleman = false;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
@@ -132,6 +136,7 @@ export class AlignSequenceComponent implements OnInit {
                 )
                 .then((res) => {
                   console.log(res);
+                  this.showResultsNeedleman = false;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
@@ -147,7 +152,25 @@ export class AlignSequenceComponent implements OnInit {
             console.log('DotPlot not implemented yet');
             break;
           case 'NeedlemanAndWunsch':
-            console.log('NeedlemanAndWunsch not implemented yet');
+            if(this.needlemanValidations()){
+              this._align.alignWithNeedlemanAndWunsch(this.sequenceToAlign, this.identifier).subscribe(
+                (res) => {
+                  console.log(res);
+                  this.showResults = false;
+                  this.resultsNeedleman = res;
+                  this.showResultsNeedleman = true;
+                },
+                (err) => {
+                  this._utilitiesServices.openSnackBarError(
+                    'Ha ocurrido un error al alinear las secuencias a través del algoritmo de needleman and wunsch'
+                  );
+                }
+              );
+            } else {
+              this._utilitiesServices.openSnackBarError(
+                'Debes rellenar todos los campos correctamente antes de empezar'
+              );
+            }
             break;
           default:
             this._utilitiesServices.openSnackBarError(
@@ -165,11 +188,18 @@ export class AlignSequenceComponent implements OnInit {
 
     if (this.selectAlignment == 'LocalWithBase') {
       this.showLocalWithBase = true;
+      this.showOptionsNeedleman = false;
     } else if (this.selectAlignment == 'Local') {
       this.showLocal = true;
+      this.showOptionsNeedleman = false;
+    } else if (this.selectAlignment == 'NeedlemanAndWunsch') {
+      this.showLocal = false;
+      this.showLocalWithBase = false;
+      this.showOptionsNeedleman = true;
     } else {
       this.showLocal = false;
       this.showLocalWithBase = false;
+      this.showOptionsNeedleman = false;
     }
   }
 
@@ -185,6 +215,20 @@ export class AlignSequenceComponent implements OnInit {
     this.showResults = false;
     this.originSequenceToPrint = [];
     this.resultSequences = [];
+  }
+  needlemanValidations(){
+    if(
+      !this.sequenceToAlign.coincidence ||
+      this.sequenceToAlign.coincidence === "" ||
+      !this.sequenceToAlign.difference ||
+      this.sequenceToAlign.difference === "" ||
+      !this.sequenceToAlign.gaps ||
+      this.sequenceToAlign.gaps  === ""
+    ){
+      this._utilitiesServices.openSnackBarError("Debes ingresar todos los campos correctamente");
+      return false;
+    }
+    return true;
   }
 
   localRangeValidations() {
@@ -247,5 +291,17 @@ export class AlignSequenceComponent implements OnInit {
         1,
         this.sequenceFasta.split('\n')[0].split('|')[4].split(',')[0].length
       );
+  }
+  validatePositions(i: number, j: number){
+    let paintTraceBack = false;
+    this.resultsNeedleman.traceBackPositions.forEach((pairPosition: number[]) => {
+      if(pairPosition[0] == i && pairPosition[1] == j){
+        console.log(`${[i,j]} esta dentro de las posiciones`);      
+        
+        paintTraceBack = true;
+      }
+    });
+
+    return paintTraceBack;
   }
 }
