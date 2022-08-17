@@ -148,8 +148,42 @@ const reverseString = (cad) => {
   return cad.split("").reverse().join("");
 };
 
+const buildDotplotMatrix = (entrySequence, dbSequence) => {
+  let matrix = [];
+  let tempMatrix = ["i/j"];
+  // entrySequence = "GGTC";
+  // dbSequence = "GAAA";
+  for (let i = 0; i < dbSequence.length; i++) {
+    for (let j = 0; j < entrySequence.length; j++) {
+      if(j == 0 && i == 1){
+        matrix.push([dbSequence[0]]);
+      }
+      if (i == 0) {
+        tempMatrix.push(entrySequence[j]);
+      } else if (j == 0) {
+        tempMatrix.push(dbSequence[i]);
+      }
+    }
+    matrix.push(tempMatrix);
+    tempMatrix = [];
+  }
+  for (let i = 0; i < matrix.length; i++) {
+    for (let j = 0; j < matrix[0].length; j++) {
+      if(i != 0 && j != 0){
+        if(matrix[i][0] == matrix[0][j]){
+          matrix[i].push("*")
+        } else {
+          matrix[i].push(" ")
+        }
+      }
+    }
+  }
+  return matrix;
+};
+
 module.exports = {
   buildNeedlemanMatrix,
   resolveNeedlemanMatrix,
   buildTraceBack,
+  buildDotplotMatrix
 };

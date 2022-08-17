@@ -9,6 +9,11 @@ import { ListSequencesComponent } from './home/list-sequences/list-sequences.com
 import { CreateSequenceComponent } from './home/create-sequence/create-sequence.component';
 import { AlignSequenceComponent } from './home/align-sequence/align-sequence.component';
 
+//plotly
+import { PlotlyModule } from 'angular-plotly.js';
+import * as PlotlyJS from 'plotly.js-dist-min';
+PlotlyModule.plotlyjs = PlotlyJS;
+
 //Services
 import { AlignService } from './services/align.service';
 import { SequenceService } from './services/sequence.service';
@@ -62,6 +67,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatRadioModule,
     MatExpansionModule,
     MatSelectModule,
+    PlotlyModule,
   ],
   providers: [ AlignService, SequenceService, UtilsService ],
   bootstrap: [AppComponent]

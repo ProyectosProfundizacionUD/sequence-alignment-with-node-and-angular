@@ -22,11 +22,12 @@ export class AlignSequenceComponent implements OnInit {
   showResultsNeedleman: boolean = false;
   showOptionsNeedleman: boolean = false;
   resultsNeedleman: any = {};
+  showResultsDotplot: boolean = false;
+  resultsDotPlot: any = {};
   entryHeaders: any = {};
   sequenceToAlign: any;
   sequenceFasta: any = {};
   regularExpression = /^[GCTAN]{1,60}$/i;
-
   selectedFile: any;
   sequenceImg: any = '';
 
@@ -65,6 +66,8 @@ export class AlignSequenceComponent implements OnInit {
           this.clear();
           this._align.align(this.sequenceToAlign).subscribe(
             (res) => {
+              this.showResultsNeedleman = false;
+              this.showResultsDotplot = false;
               this.originSequenceToPrint = res.sequence.split('');
               this.dataToArray(res.results);
               this.showResults = true;
@@ -80,6 +83,8 @@ export class AlignSequenceComponent implements OnInit {
               .localAlign(this.sequenceToAlign, this.entryHeaders)
               .then((res) => {
                 console.log(res);
+                this.showResultsNeedleman = false;
+                this.showResultsDotplot = false;
                 this.originSequenceToPrint = res.sequence.split('');
                 this.dataToArray(res.results);
                 this.showResults = true;
@@ -117,6 +122,7 @@ export class AlignSequenceComponent implements OnInit {
               .subscribe(
                 (res) => {
                   this.showResultsNeedleman = false;
+                  this.showResultsDotplot = false;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
@@ -137,6 +143,7 @@ export class AlignSequenceComponent implements OnInit {
                 .then((res) => {
                   console.log(res);
                   this.showResultsNeedleman = false;
+                  this.showResultsDotplot = false;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
@@ -149,7 +156,46 @@ export class AlignSequenceComponent implements OnInit {
             }
             break;
           case 'DotPlot':
-            console.log('DotPlot not implemented yet');
+            this.showResults = false;
+            this.showResultsNeedleman = false;
+            if(
+              this.entryHeaders.x1 == undefined ||
+              this.entryHeaders.x2 == undefined ||
+              this.entryHeaders.y1 == undefined ||
+              this.entryHeaders.y2 == undefined
+              ){
+                //global
+                this._align.DotPlot(this.sequenceToAlign, this.identifier).subscribe(
+                  (res) =>{
+                    this._utilitiesServices.openSnackBarSuccesfull("El alineamiento se ha realizado de forma global")
+                    this.resultsDotPlot = res;
+                    this.showResultsDotplot = true;
+                  },
+                  (err) =>{
+                    this._utilitiesServices.openSnackBarError("Ha ocurrido un error al realizar el dotplot")
+                  }
+                )
+              } else {
+                //local
+                if (this.localRangeValidations()) {
+                  await this._align
+                    .DotPlotLocal(
+                      this.sequenceToAlign,
+                      this.entryHeaders,
+                      this.identifier
+                    )
+                    .then((res) => {
+                      this._utilitiesServices.openSnackBarSuccesfull("El alineamiento se ha realizado de forma local")
+                      this.resultsDotPlot = res;
+                      this.showResultsDotplot = true;
+                    })
+                    .catch((err) => {
+                      this._utilitiesServices.openSnackBarError(
+                        'Ha ocurrido un error al alinear las secuencias'
+                      );
+                    });
+                }
+              }
             break;
           case 'NeedlemanAndWunsch':
             if(this.needlemanValidations()){
@@ -159,6 +205,7 @@ export class AlignSequenceComponent implements OnInit {
                   this.showResults = false;
                   this.resultsNeedleman = res;
                   this.showResultsNeedleman = true;
+                  this.showResultsDotplot = false;
                 },
                 (err) => {
                   this._utilitiesServices.openSnackBarError(
@@ -196,6 +243,10 @@ export class AlignSequenceComponent implements OnInit {
       this.showLocal = false;
       this.showLocalWithBase = false;
       this.showOptionsNeedleman = true;
+    } else if (this.selectAlignment == 'DotPlot') {
+      this.showLocal = true;
+      this.showLocalWithBase = false;
+      this.showOptionsNeedleman = false;
     } else {
       this.showLocal = false;
       this.showLocalWithBase = false;

@@ -421,3 +421,27 @@
     </tbody>
   </table>
 </div>
+<div class="content overflow-auto" *ngIf="showResultsDotplot">
+  <div>
+    <p class="fs-5"><b>Información Secuencia de entrada (Superior):</b></p>
+    <p class="fs-6">Organismo: {{resultsDotPlot.info[0].organism}}</p>
+    <p class="fs-6">Longitud Secuencia: {{resultsDotPlot.info[0].size}}</p>
+  </div>
+  <div>
+    <p class="fs-5"><b>Información Secuencia de la base de datos (izquierda):</b></p>
+    <p class="fs-6">Organismo: {{resultsDotPlot.info[1].organism}}</p>
+    <p class="fs-6">Longitud Secuencia: {{resultsDotPlot.info[1].size}}</p>
+  </div>
+  <table class="table table-borderless">
+    <tbody class="table-group-divider">
+      <tr *ngFor="let fila of resultsDotPlot.matrix; let i = index">
+        <td 
+          *ngFor="let field of fila; let j = index"
+          [ngClass]="{'fw-bold': i == 0 || j == 0, 'border-end': j == 0, 'border-bottom': i == 0}"
+        >
+          {{field}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

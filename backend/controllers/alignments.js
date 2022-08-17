@@ -1,5 +1,5 @@
 const Sequence = require("../models/sequence");
-const Methods = require('../Methods/alignmentMethods');
+const Methods = require("../Methods/alignmentMethods");
 
 const LocalAndGlobalAlignment = (req, res) => {
   var headers = req.headers;
@@ -11,7 +11,7 @@ const LocalAndGlobalAlignment = (req, res) => {
 
   //validar  con expresion regular
 
-  sequence = sequence.toUpperCase()
+  sequence = sequence.toUpperCase();
 
   ValidateHeaders(headers) == true
     ? LocalAlignment(headers, sequence, organism, res, req.params["filter"])
@@ -82,8 +82,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
   let tempScore = 0;
   let sameSize = false;
   for (let i = 0; i < sequences.length; i++) {
-    if(sequences[i].sequence.length == size)
-      sameSize = true;
+    if (sequences[i].sequence.length == size) sameSize = true;
     for (let j = 0; j < sequence.length; j++) {
       if (sequence[j] == sequences[i].sequence[j]) {
         tempResult += "1";
@@ -103,7 +102,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
     tempScore = 0;
     sameSize = false;
   }
-  result.results = result.results.sort(((a, b) => b.score - a.score));
+  result.results = result.results.sort((a, b) => b.score - a.score);
 
   return res.status(200).send(result);
 };
@@ -134,8 +133,7 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
   let tempScore = 0;
   let sameSize = false;
   for (let i = 0; i < sequences.length; i++) {
-    if(sequences[i].sequence.length == size)
-      sameSize = true;
+    if (sequences[i].sequence.length == size) sameSize = true;
     for (let j = 0; j < sequence.length; j++) {
       if (sequence[j] == sequences[i].sequence[j]) {
         tempResult += "1";
@@ -155,7 +153,7 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
     tempScore = 0;
     sameSize = false;
   }
-  result.results = result.results.sort(((a, b) => b.score - a.score));
+  result.results = result.results.sort((a, b) => b.score - a.score);
 
   return res.status(200).send(result);
 };
@@ -171,46 +169,108 @@ const NeedlemanAndWunsch = async (req, res) => {
   if (!sequence || sequence === "")
     return res.status(400).send("You must send a valid sequence");
 
-  if(
-      !coincidence ||
-      coincidence === "" ||
-      !difference ||
-      difference === "" ||
-      !gaps ||
-      gaps  === ""
-    )
+  if (
+    !coincidence ||
+    coincidence === "" ||
+    !difference ||
+    difference === "" ||
+    !gaps ||
+    gaps === ""
+  )
     return res.status(400).send("You need to send all fields");
 
-  sequence = sequence.toUpperCase()
+  sequence = sequence.toUpperCase();
 
-  let sequenceToAlign = await Sequence.findOne({ identifier: new RegExp(identifier, "i") });
+  let sequenceToAlign = await Sequence.findOne({
+    identifier: new RegExp(identifier, "i"),
+  });
   if (!sequenceToAlign || sequenceToAlign.length === 0)
     return res.status(500).send("an error was happen while we get the data");
 
-  let matrix = Methods.buildNeedlemanMatrix(sequence, sequenceToAlign.sequence, gaps);
+  let matrix = Methods.buildNeedlemanMatrix(
+    sequence,
+    sequenceToAlign.sequence,
+    gaps
+  );
 
   matrix = Methods.resolveNeedlemanMatrix(matrix, coincidence, difference);
 
-  let alignmentPath = Methods.buildTraceBack(matrix, coincidence, difference, gaps);
+  let alignmentPath = Methods.buildTraceBack(
+    matrix,
+    coincidence,
+    difference,
+    gaps
+  );
 
   return res.status(201).send({
     traceBack: [
       {
         organism: organism,
         sequence: alignmentPath[0][0],
-        size: sequence.length
-
+        size: sequence.length,
       },
       {
         organism: sequenceToAlign.organism,
         sequence: alignmentPath[0][1],
-        size: sequenceToAlign.sequence.length
-      }
+        size: sequenceToAlign.sequence.length,
+      },
     ],
     score: alignmentPath[2],
     traceBackPositions: alignmentPath[1],
-    matrix: matrix
-  })
-}
+    matrix: matrix,
+  });
+};
 
-module.exports = { LocalAndGlobalAlignment, NeedlemanAndWunsch };
+const DotPlot = async (req, res) => {
+  var headers = req.headers;
+  let organism = req.body.organism;
+  let sequence = req.body.sequence;
+  let identifier = req.params["filter"];
+
+  if (!sequence || sequence === "")
+    return res.status(400).send("You must send a valid sequence");
+
+  sequence = sequence.toUpperCase();
+
+  let sequenceToAlign = await Sequence.findOne({
+    identifier: new RegExp(identifier, "i"),
+  });
+  if (!sequenceToAlign || sequenceToAlign.length === 0)
+    return res.status(500).send("an error was happen while we get the data");
+
+  if (ValidateHeaders(headers)) {
+    if (
+      parseInt(headers["x2"]) > sequence.length ||
+      parseInt(headers["y2"]) > sequenceToAlign.sequence.length
+    )
+      return res
+        .status(400)
+        .send("the range must be lower than the sequence length");
+    sequence = sequence.substring(
+      parseInt(headers["x1"]),
+      parseInt(headers["x2"]) + 1
+    );
+    sequenceToAlign.sequence = sequenceToAlign.sequence.substring(
+      parseInt(headers["y1"]),
+      parseInt(headers["y2"]) + 1
+    );
+  }
+
+  let matrix = Methods.buildDotplotMatrix(sequence, sequenceToAlign.sequence);
+
+  return res.status(200).send({
+    info: [
+      {
+        organism: organism,
+        size: sequence.length,
+      },
+      {
+        organism: sequenceToAlign.organism,
+        size: sequenceToAlign.sequence.length,
+      },
+    ],
+    matrix,
+  });
+};
+
+module.exports = { LocalAndGlobalAlignment, NeedlemanAndWunsch, DotPlot };
