@@ -70,6 +70,7 @@ export class AlignSequenceComponent implements OnInit {
             (res) => {
               this.showResultsNeedleman = false;
               this.showResultsDotplot = false;
+              this.sizeSequenceToAlign = res.size;
               this.originSequenceToPrint = res.sequence.split('');
               this.dataToArray(res.results);
               this.showResults = true;
@@ -127,6 +128,7 @@ export class AlignSequenceComponent implements OnInit {
                 (res) => {
                   this.showResultsNeedleman = false;
                   this.showResultsDotplot = false;
+                  this.sizeSequenceToAlign = res.size;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
