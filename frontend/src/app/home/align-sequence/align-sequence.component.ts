@@ -30,6 +30,8 @@ export class AlignSequenceComponent implements OnInit {
   regularExpression = /^[GCTAN]{1,60}$/i;
   selectedFile: any;
   sequenceImg: any = '';
+  messageError: string = "";
+  sizeSequenceToAlign: number = 0;
 
   constructor(
     private _sequence: SequenceService,
@@ -82,7 +84,9 @@ export class AlignSequenceComponent implements OnInit {
             await this._align
               .localAlign(this.sequenceToAlign, this.entryHeaders)
               .then((res) => {
-                console.log(res);
+                if(res.error != null)
+                  this.messageError = res.error;
+                this.sizeSequenceToAlign = res.size;
                 this.showResultsNeedleman = false;
                 this.showResultsDotplot = false;
                 this.originSequenceToPrint = res.sequence.split('');
@@ -91,7 +95,7 @@ export class AlignSequenceComponent implements OnInit {
               })
               .catch((err) => {
                 this._utilitiesServices.openSnackBarError(
-                  'Ha ocurrido un error al alinear las secuencias'
+                  this.messageError
                 );
               });
           }
@@ -141,7 +145,9 @@ export class AlignSequenceComponent implements OnInit {
                   this.identifier
                 )
                 .then((res) => {
-                  console.log(res);
+                  if(res.error != null)
+                    this.messageError = res.error;
+                  this.sizeSequenceToAlign = res.size;
                   this.showResultsNeedleman = false;
                   this.showResultsDotplot = false;
                   this.originSequenceToPrint = res.sequence.split('');
@@ -150,7 +156,7 @@ export class AlignSequenceComponent implements OnInit {
                 })
                 .catch((err) => {
                   this._utilitiesServices.openSnackBarError(
-                    'Ha ocurrido un error al alinear las secuencias'
+                    this.messageError
                   );
                 });
             }
@@ -185,13 +191,16 @@ export class AlignSequenceComponent implements OnInit {
                       this.identifier
                     )
                     .then((res) => {
+                      if(res.error != null)
+                        this.messageError = res.error;                      
                       this._utilitiesServices.openSnackBarSuccesfull("El alineamiento se ha realizado de forma local")
+                      this.sizeSequenceToAlign = res.size;
                       this.resultsDotPlot = res;
                       this.showResultsDotplot = true;
                     })
                     .catch((err) => {
                       this._utilitiesServices.openSnackBarError(
-                        'Ha ocurrido un error al alinear las secuencias'
+                        this.messageError
                       );
                     });
                 }

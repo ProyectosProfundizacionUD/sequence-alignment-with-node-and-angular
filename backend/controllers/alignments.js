@@ -7,7 +7,7 @@ const LocalAndGlobalAlignment = (req, res) => {
   var sequence = req.body.sequence;
 
   if (!sequence || sequence === "")
-    return res.status(400).send("You must send a valid sequence");
+    return res.status(400).send({error: "You must send a valid sequence"});
 
   //validar  con expresion regular
 
@@ -32,8 +32,22 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
   let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
 
   if (!sequences || sequences.length === 0)
-    return res.status(500).send("an error was happen while we get the data");
+    return res.status(500).send({error: "an error was happen while we get the data"});
 
+  let lowerSize = 60;
+  sequences.forEach(chain => {
+    if(chain.sequence.length < lowerSize)
+      lowerSize = chain.sequence.length;
+  });
+
+  if (
+    parseInt(headers["x2"]) > sequence.length ||
+    parseInt(headers["y2"]) > lowerSize - 1
+  )
+    return res
+      .status(400)
+      .send({error: "El rango debe ser menor al tamaño de la sequencia"});
+  
   //get the subsequences from the headers range
   sequence = sequence.substring(
     parseInt(headers["x1"]),
@@ -45,6 +59,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
       parseInt(headers["y2"]) + 1
     );
   });
+  
   let size = sequence.length;
 
   if (
@@ -75,6 +90,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
   let result = {
     organism: organism,
     sequence: sequence,
+    size: size,
     results: [],
   };
 
@@ -97,6 +113,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
       alignment: tempResult,
       score: tempScore,
       sameSize: sameSize,
+      size: sequences[i].sequence.length
     });
     tempResult = "";
     tempScore = 0;
@@ -110,7 +127,7 @@ const LocalAlignment = async (headers, sequence, organism, res, filter) => {
 const GlobalAlignment = async (sequence, organism, res, filter) => {
   let sequences = await Sequence.find({ identifier: new RegExp(filter, "i") });
   if (!sequences || sequences.length === 0)
-    return res.status(500).send("an error was happen while we get the data");
+    return res.status(500).send({error: "an error was happen while we get the data"});
 
   // validamos que el tamaño de la secuencia sea igual al tamaño estandar
   // de las secuencias almacenadas, de no serlo, le concatenamos campos vacios
@@ -126,6 +143,7 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
   let result = {
     organism: organism,
     sequence: sequence,
+    size: size,
     results: [],
   };
 
@@ -148,6 +166,7 @@ const GlobalAlignment = async (sequence, organism, res, filter) => {
       alignment: tempResult,
       score: tempScore,
       sameSize: sameSize,
+      size: sequences[i].sequence.length
     });
     tempResult = "";
     tempScore = 0;
@@ -167,7 +186,7 @@ const NeedlemanAndWunsch = async (req, res) => {
   let identifier = req.params["filter"];
 
   if (!sequence || sequence === "")
-    return res.status(400).send("You must send a valid sequence");
+    return res.status(400).send({error: "You must send a valid sequence"});
 
   if (
     !coincidence ||
@@ -177,7 +196,7 @@ const NeedlemanAndWunsch = async (req, res) => {
     !gaps ||
     gaps === ""
   )
-    return res.status(400).send("You need to send all fields");
+    return res.status(400).send({error: "You need to send all fields"});
 
   sequence = sequence.toUpperCase();
 
@@ -185,7 +204,7 @@ const NeedlemanAndWunsch = async (req, res) => {
     identifier: new RegExp(identifier, "i"),
   });
   if (!sequenceToAlign || sequenceToAlign.length === 0)
-    return res.status(500).send("an error was happen while we get the data");
+    return res.status(500).send({error: "an error was happen while we get the data"});
 
   let matrix = Methods.buildNeedlemanMatrix(
     sequence,
@@ -228,7 +247,7 @@ const DotPlot = async (req, res) => {
   let identifier = req.params["filter"];
 
   if (!sequence || sequence === "")
-    return res.status(400).send("You must send a valid sequence");
+    return res.status(400).send({error: "You must send a valid sequence"});
 
   sequence = sequence.toUpperCase();
 
@@ -236,7 +255,7 @@ const DotPlot = async (req, res) => {
     identifier: new RegExp(identifier, "i"),
   });
   if (!sequenceToAlign || sequenceToAlign.length === 0)
-    return res.status(500).send("an error was happen while we get the data");
+    return res.status(500).send({error: "an error was happen while we get the data"});
 
   if (ValidateHeaders(headers)) {
     if (
@@ -245,7 +264,7 @@ const DotPlot = async (req, res) => {
     )
       return res
         .status(400)
-        .send("the range must be lower than the sequence length");
+        .send({error: "the range must be lower than the sequence length"});
     sequence = sequence.substring(
       parseInt(headers["x1"]),
       parseInt(headers["x2"]) + 1
