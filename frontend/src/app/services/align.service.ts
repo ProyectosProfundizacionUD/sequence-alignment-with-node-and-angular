@@ -17,6 +17,30 @@ export class AlignService {
   alignWitOneSequence(data: any, identifier: String){
     return this._httpClient.post<any>(`${ this.env }align/${identifier}`, data);
   }
+
+  DotPlot(data: any, identifier: String){
+    return this._httpClient.post<any>(`${ this.env }dotplot/${identifier}`, data);
+  }
+
+  async DotPlotLocal(data: any, entryHeaders: any, identifier: String){
+    const response = await fetch(`${ this.env }dotplot/${identifier}`, {
+      method: 'POST',
+      mode: 'cors',
+      cache: 'no-cache',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'x1': entryHeaders.x1,
+        'x2': entryHeaders.x2,
+        'y1': entryHeaders.y1,
+        'y2': entryHeaders.y2,
+      },
+      redirect: 'follow',
+      referrerPolicy: 'no-referrer',
+      body: JSON.stringify(data)
+    });
+    return response.json();
+  }
   async localAlign(data: any, entryHeaders: any){
     const response = await fetch(`${ this.env }align`, {
       method: 'POST',
@@ -54,5 +78,8 @@ export class AlignService {
       body: JSON.stringify(data)
     });
     return response.json();
+  }
+  alignWithNeedlemanAndWunsch(data: any, identifier: String){
+    return this._httpClient.post<any>(`${ this.env }needleman-and-wunsch/${identifier}`, data);
   }
 }

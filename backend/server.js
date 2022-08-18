@@ -7,6 +7,8 @@ require('dotenv').config();
 const Sequence = require('./routes/sequence');
 const Health = require('./routes/health');
 const Alignment = require('./routes/alignments');
+const dynamicAlignment = require('./routes/dynamicAlignment')
+const dotPlot = require('./routes/dotplot')
 
 const app = express();
 
@@ -15,6 +17,8 @@ app.use(cors());
 app.use('/api/sequence', Sequence);
 app.use('/api', Health);
 app.use('/api/align', Alignment);
+app.use('/api/needleman-and-wunsch', dynamicAlignment);
+app.use('/api/dotplot', dotPlot);
 
 app.use(express.static("public"));
 app.get("*", (req, res) => {

@@ -19,13 +19,19 @@ export class AlignSequenceComponent implements OnInit {
   showLocalWithBase: Boolean = false;
   showLocal: Boolean = false;
   showResults: boolean = false;
+  showResultsNeedleman: boolean = false;
+  showOptionsNeedleman: boolean = false;
+  resultsNeedleman: any = {};
+  showResultsDotplot: boolean = false;
+  resultsDotPlot: any = {};
   entryHeaders: any = {};
   sequenceToAlign: any;
   sequenceFasta: any = {};
   regularExpression = /^[GCTAN]{1,60}$/i;
-
   selectedFile: any;
   sequenceImg: any = '';
+  messageError: string = "";
+  sizeSequenceToAlign: number = 0;
 
   constructor(
     private _sequence: SequenceService,
@@ -62,6 +68,9 @@ export class AlignSequenceComponent implements OnInit {
           this.clear();
           this._align.align(this.sequenceToAlign).subscribe(
             (res) => {
+              this.showResultsNeedleman = false;
+              this.showResultsDotplot = false;
+              this.sizeSequenceToAlign = res.size;
               this.originSequenceToPrint = res.sequence.split('');
               this.dataToArray(res.results);
               this.showResults = true;
@@ -76,14 +85,18 @@ export class AlignSequenceComponent implements OnInit {
             await this._align
               .localAlign(this.sequenceToAlign, this.entryHeaders)
               .then((res) => {
-                console.log(res);
+                if(res.error != null)
+                  this.messageError = res.error;
+                this.sizeSequenceToAlign = res.size;
+                this.showResultsNeedleman = false;
+                this.showResultsDotplot = false;
                 this.originSequenceToPrint = res.sequence.split('');
                 this.dataToArray(res.results);
                 this.showResults = true;
               })
               .catch((err) => {
                 this._utilitiesServices.openSnackBarError(
-                  'Ha ocurrido un error al alinear las secuencias'
+                  this.messageError
                 );
               });
           }
@@ -113,6 +126,9 @@ export class AlignSequenceComponent implements OnInit {
               .alignWitOneSequence(this.sequenceToAlign, this.identifier)
               .subscribe(
                 (res) => {
+                  this.showResultsNeedleman = false;
+                  this.showResultsDotplot = false;
+                  this.sizeSequenceToAlign = res.size;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
@@ -131,23 +147,88 @@ export class AlignSequenceComponent implements OnInit {
                   this.identifier
                 )
                 .then((res) => {
-                  console.log(res);
+                  if(res.error != null)
+                    this.messageError = res.error;
+                  this.sizeSequenceToAlign = res.size;
+                  this.showResultsNeedleman = false;
+                  this.showResultsDotplot = false;
                   this.originSequenceToPrint = res.sequence.split('');
                   this.dataToArray(res.results);
                   this.showResults = true;
                 })
                 .catch((err) => {
                   this._utilitiesServices.openSnackBarError(
-                    'Ha ocurrido un error al alinear las secuencias'
+                    this.messageError
                   );
                 });
             }
             break;
           case 'DotPlot':
-            console.log('DotPlot not implemented yet');
+            this.showResults = false;
+            this.showResultsNeedleman = false;
+            if(
+              this.entryHeaders.x1 == undefined ||
+              this.entryHeaders.x2 == undefined ||
+              this.entryHeaders.y1 == undefined ||
+              this.entryHeaders.y2 == undefined
+              ){
+                //global
+                this._align.DotPlot(this.sequenceToAlign, this.identifier).subscribe(
+                  (res) =>{
+                    this._utilitiesServices.openSnackBarSuccesfull("El alineamiento se ha realizado de forma global")
+                    this.resultsDotPlot = res;
+                    this.showResultsDotplot = true;
+                  },
+                  (err) =>{
+                    this._utilitiesServices.openSnackBarError("Ha ocurrido un error al realizar el dotplot")
+                  }
+                )
+              } else {
+                //local
+                if (this.localRangeValidations()) {
+                  await this._align
+                    .DotPlotLocal(
+                      this.sequenceToAlign,
+                      this.entryHeaders,
+                      this.identifier
+                    )
+                    .then((res) => {
+                      if(res.error != null)
+                        this.messageError = res.error;                      
+                      this._utilitiesServices.openSnackBarSuccesfull("El alineamiento se ha realizado de forma local")
+                      this.sizeSequenceToAlign = res.size;
+                      this.resultsDotPlot = res;
+                      this.showResultsDotplot = true;
+                    })
+                    .catch((err) => {
+                      this._utilitiesServices.openSnackBarError(
+                        this.messageError
+                      );
+                    });
+                }
+              }
             break;
           case 'NeedlemanAndWunsch':
-            console.log('NeedlemanAndWunsch not implemented yet');
+            if(this.needlemanValidations()){
+              this._align.alignWithNeedlemanAndWunsch(this.sequenceToAlign, this.identifier).subscribe(
+                (res) => {
+                  console.log(res);
+                  this.showResults = false;
+                  this.resultsNeedleman = res;
+                  this.showResultsNeedleman = true;
+                  this.showResultsDotplot = false;
+                },
+                (err) => {
+                  this._utilitiesServices.openSnackBarError(
+                    'Ha ocurrido un error al alinear las secuencias a través del algoritmo de needleman and wunsch'
+                  );
+                }
+              );
+            } else {
+              this._utilitiesServices.openSnackBarError(
+                'Debes rellenar todos los campos correctamente antes de empezar'
+              );
+            }
             break;
           default:
             this._utilitiesServices.openSnackBarError(
@@ -165,11 +246,22 @@ export class AlignSequenceComponent implements OnInit {
 
     if (this.selectAlignment == 'LocalWithBase') {
       this.showLocalWithBase = true;
+      this.showOptionsNeedleman = false;
     } else if (this.selectAlignment == 'Local') {
       this.showLocal = true;
+      this.showOptionsNeedleman = false;
+    } else if (this.selectAlignment == 'NeedlemanAndWunsch') {
+      this.showLocal = false;
+      this.showLocalWithBase = false;
+      this.showOptionsNeedleman = true;
+    } else if (this.selectAlignment == 'DotPlot') {
+      this.showLocal = true;
+      this.showLocalWithBase = false;
+      this.showOptionsNeedleman = false;
     } else {
       this.showLocal = false;
       this.showLocalWithBase = false;
+      this.showOptionsNeedleman = false;
     }
   }
 
@@ -185,6 +277,20 @@ export class AlignSequenceComponent implements OnInit {
     this.showResults = false;
     this.originSequenceToPrint = [];
     this.resultSequences = [];
+  }
+  needlemanValidations(){
+    if(
+      !this.sequenceToAlign.coincidence ||
+      this.sequenceToAlign.coincidence === "" ||
+      !this.sequenceToAlign.difference ||
+      this.sequenceToAlign.difference === "" ||
+      !this.sequenceToAlign.gaps ||
+      this.sequenceToAlign.gaps  === ""
+    ){
+      this._utilitiesServices.openSnackBarError("Debes ingresar todos los campos correctamente");
+      return false;
+    }
+    return true;
   }
 
   localRangeValidations() {
@@ -247,5 +353,17 @@ export class AlignSequenceComponent implements OnInit {
         1,
         this.sequenceFasta.split('\n')[0].split('|')[4].split(',')[0].length
       );
+  }
+  validatePositions(i: number, j: number){
+    let paintTraceBack = false;
+    this.resultsNeedleman.traceBackPositions.forEach((pairPosition: number[]) => {
+      if(pairPosition[0] == i && pairPosition[1] == j){
+        console.log(`${[i,j]} esta dentro de las posiciones`);      
+        
+        paintTraceBack = true;
+      }
+    });
+
+    return paintTraceBack;
   }
 }
