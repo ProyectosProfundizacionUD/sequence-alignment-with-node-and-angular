@@ -25,4 +25,4 @@ David Galindo
 Diego Restrepo  
 Johan Samir  
 
-*Note: is important to upload the code only into dev branch and then, create a Pull Request to merge with the main branch!*
+*Note: is important to upload the code only into dev branch and then, create a Pull Request to merge with the main branch*
